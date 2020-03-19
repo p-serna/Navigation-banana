@@ -24,11 +24,14 @@ class Agent():
                     nu = None, dropout = None, model = QNetwork ):
         '''Initialize an Agent object.
         
-        Params
-        ======
-            state_size (int): dimension of each state
-            action_size (int): dimension of each action
-            seed (int): random seed
+        Input parameters
+        
+           -state_size (int): dimension of each state
+           -action_size (int): dimension of each action
+           -seed (int): random seed
+           -nu (list): list of number of units to set up the Q Network
+           -dropout: whether to include dropout or not (not used for the moment)
+           -model: name of th Q Network to be used
         '''
         self.state_size = state_size
         self.action_size = action_size
@@ -63,10 +66,10 @@ class Agent():
     def act(self, state, eps=0.):
         '''Returns actions for given state as per current policy.
         
-        Params
-        ======
-            state (array_like): current state
-            eps (float): epsilon, for epsilon-greedy action selection
+        Input parameters
+
+            -state (array_like): current state
+            -eps (float): epsilon, for epsilon-greedy action selection
         '''
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
         self.qnetwork_online.eval()
@@ -83,10 +86,10 @@ class Agent():
     def learn(self, experiences, gamma):
         '''Update value parameters using given batch of experience tuples.
 
-        Params
-        ======
-            experiences (Tuple[torch.Variable]): tuple of (s, a, r, s', done) tuples 
-            gamma (float): discount factor
+        Input parameters
+
+            -experiences (Tuple[torch.Variable]): tuple of (s, a, r, s', done) tuples 
+            -gamma (float): discount factor
         '''
         states, actions, rewards, next_states, dones = experiences
 
@@ -115,11 +118,11 @@ class Agent():
         '''Soft update model parameters.
         network_target = tau*network_online + (1 - target)*network_target
 
-        Params
-        ======
-            online_model (PyTorch model): weights will be copied from
-            target_model (PyTorch model): weights will be copied to
-            tau (float): interpolation parameter 
+        Input parameters
+
+            -online_model (PyTorch model): weights will be copied from
+            -target_model (PyTorch model): weights will be copied to
+            -tau (float): interpolation parameter 
         '''
         for target_param, online_param in zip(target_model.parameters(), online_model.parameters()):
             target_param.data.copy_(tau*online_param.data + (1.0-tau)*target_param.data)
@@ -131,13 +134,18 @@ class AgentRainbow(Agent):
     def __init__(self, state_size, action_size, 
                     seed, nu = None, dropout = None, model = QNetwork,
                     e = 1e-3, alpha = 0.5, beta = 1.0 ):
-        '''Initialize an Agent object.
+        '''Initialize a Rainbow Agent object.
         
-        Params
-        ======
-            state_size (int): dimension of each state
-            action_size (int): dimension of each action
-            seed (int): random seed
+
+        Input parameters
+        
+           -state_size (int): dimension of each state
+           -action_size (int): dimension of each action
+           -seed (int): random seed
+           -nu (list): list of number of units to set up the Q Network
+           -dropout: whether to include dropout or not (not used for the moment)
+           -model: name of th Q Network to be used
+           -e, alpha, beta: parameters for prioritized replay
         '''    
         super().__init__(state_size, action_size, seed, nu, dropout, model)
         self.optimizer = optim.Adam(self.qnetwork_online.parameters(), 
@@ -152,10 +160,10 @@ class AgentRainbow(Agent):
     def learn(self, experiences, gamma):
         '''Update value parameters using given batch of experience tuples.
 
-        Params
-        ======
-            experiences (Tuple[torch.Variable]): tuple of (s, a, r, s', done) tuples 
-            gamma (float): discount factor
+        Input parameters
+
+            -experiences (Tuple[torch.Variable]): tuple of (s, a, r, s', done) tuples 
+            -gamma (float): discount factor
         '''
         states, actions, rewards, next_states, dones, indices, weights = experiences
 
@@ -210,12 +218,12 @@ class ReplayBuffer:
     def __init__(self, action_size, buffer_size, batch_size, seed):
         '''Initialize a ReplayBuffer object.
 
-        Params
-        ======
-            action_size (int): dimension of each action
-            buffer_size (int): maximum size of buffer
-            batch_size (int): size of each training batch
-            seed (int): random seed
+        Input parameters
+
+            -action_size (int): dimension of each action
+            -buffer_size (int): maximum size of buffer
+            -batch_size (int): size of each training batch
+            -seed (int): random seed
         '''
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)  
@@ -254,12 +262,12 @@ class ReplayBufferPrioritized(ReplayBuffer):
     def __init__(self, action_size, buffer_size, batch_size, seed):
         '''Initialize a ReplayBuffer with Prioritized replay object.
 
-        Params
-        ======
-            action_size (int): dimension of each action
-            buffer_size (int): maximum size of buffer
-            batch_size (int): size of each training batch
-            seed (int): random seed
+        Input parameters
+
+            -action_size (int): dimension of each action
+            -buffer_size (int): maximum size of buffer
+            -batch_size (int): size of each training batch
+            -seed (int): random seed
         '''
         super().__init__(action_size, buffer_size, batch_size, seed)
 
@@ -283,7 +291,11 @@ class ReplayBufferPrioritized(ReplayBuffer):
             self.priorities[idx] = tde
         
     def sample_prioritized(self, e, alpha, beta):
-        '''Randomly sample a batch of experiences from memory with priority.'''
+        '''Randomly sample a batch of experiences from memory with priority.
+
+           Input parameters
+            - e, alpha, beta: parameters for prioritized replay
+        '''
         
         # Calculating probabilities for priorities
         tderrors = np.asarray(self.priorities, dtype = np.float32).flatten()

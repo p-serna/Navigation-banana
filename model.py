@@ -5,8 +5,10 @@ import torch.nn.functional as F
 def createblocklist(nu, dropout = None):
     '''This function return a list of modules to be implemented as a sequential layer block
     Input variables:
-    nu: array with number of filters (or strides for pooling layers) for different layers of the network
     
+      -nu: array with number of filters (or strides for pooling layers) for different layers of the network
+      -dropout: to include dropout - not used for the moment
+      
     Output:
     list of pytorch layers
     '''
@@ -21,20 +23,21 @@ def createblocklist(nu, dropout = None):
     return modlist
 
 class DuelQNetwork(nn.Module):
-    """Actor (Policy) Model."""
+    """Duel Policy Model."""
 
     def __init__(self, state_size, action_size, seed, 
                     nu = None, nu_state = None, nu_adv = None, dropout = None):
         """Initialize parameters and build model.
-        Params
-        ======
-            state_size (int): Dimension of each state
-            action_size (int): Dimension of each action
-            seed (int): Random seed
-            nu : list of number of units of a sequential list of FC layers 
-            nu_state : similar list for the part of the state value Sv 
-            nu_adv : similar list for the Advantage
-            nu : number of units 
+
+        Input parameters
+
+            -state_size (int): Dimension of each state
+            -action_size (int): Dimension of each action
+            -seed (int): Random seed
+            -nu : list of number of units of a sequential list of FC layers 
+            -nu_state : similar list for the part of the state value Sv 
+            -nu_adv : similar list for the Advantage
+            -nu : number of units 
         """
         super(DuelQNetwork, self).__init__() 
         self.seed = torch.manual_seed(seed)
