@@ -32,4 +32,3 @@ The algorithm trains really well and in less than 600 episodes it surpass the ta
 
 - Also, we could improve the architecture of the Duelling Neural Network that we have not explored much.
 
-- 
